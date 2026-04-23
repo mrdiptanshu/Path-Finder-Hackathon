@@ -1,0 +1,63 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // -------------------------------------------------------------------------
+    //  GLOBAL HELPERS
+    // -------------------------------------------------------------------------
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+
+    // -------------------------------------------------------------------------
+    //  VALIDATION HELPERS
+    // -------------------------------------------------------------------------
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email'])
+          && data.uid is string && data.uid.size() <= 128
+          && data.email is string && data.email.size() <= 256
+          && (data.get('displayName', '') is string)
+          && (data.get('phoneNumber', '') is string)
+          && (data.get('preferredLanguage', 'en') in ['en', 'hi'])
+          && (data.get('theme', 'light') in ['light', 'dark'])
+          && (data.get('notificationsEnabled', false) is bool);
+    }
+
+    function isValidScan(data) {
+      return data.keys().hasAll(['userId', 'timestamp', 'analysisResult'])
+          && data.userId == request.auth.uid
+          && data.analysisResult is string && data.analysisResult.size() <= 10000
+          && (data.get('cropType', '') is string)
+          && (data.get('diseaseDetected', '') is string)
+          && (data.get('confidence', 0) is number);
+    }
+
+    // -------------------------------------------------------------------------
+    //  MATCH BLOCKS
+    // -------------------------------------------------------------------------
+    
+    // Default deny ALL
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().uid == userId;
+      allow update: if isOwner(userId) && isValidUser(incoming()) 
+                     && incoming().uid == existing().uid
+                     && incoming().email == existing().email;
+    }
+
+    // Crop scans
+    match /scans/{scanId} {
+      allow get: if isSignedIn() && existing().userId == request.auth.uid;
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidScan(incoming());
+      allow delete: if isSignedIn() && existing().userId == request.auth.uid;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "FarmEasy",
+  "description": "An AI-powered agricultural companion for farmers with crop disease detection, weather alerts, and market prices in multiple languages.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "AI Crop Analysis",
+    "Real-time Weather",
+    "Multi-language Support"
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "preferredLanguage": { "type": "string", "enum": ["en", "hi"] },
+        "theme": { "type": "string", "enum": ["light", "dark"] },
+        "notificationsEnabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "CropScan": {
+      "title": "Crop Analysis Record",
+      "description": "Historical record of crop disease analysis",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "cropImage": { "type": "string", "description": "Base64 or reference to image" },
+        "analysisResult": { "type": "string" },
+        "cropType": { "type": "string" },
+        "diseaseDetected": { "type": "string" },
+        "confidence": { "type": "number" }
+      },
+      "required": ["userId", "timestamp", "analysisResult"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Individual user profiles and preferences"
+    },
+    "/scans/{scanId}": {
+      "schema": "CropScan",
+      "description": "Global collection of crop disease scans, secured by userId"
+    }
+  }
+}
