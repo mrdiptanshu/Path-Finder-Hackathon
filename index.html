@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FarmEasy – Farmer Helper App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    /* ===== VARIABLES ===== */
+    :root {
+      --green:    #2E7D32;
+      --green-l:  #43A047;
+      --green-xl: #A5D6A7;
+      --gold:     #F9A825;
+      --gold-l:   #FFF9C4;
+      --soil:     #5D4037;
+      --sky:      #0277BD;
+      --sky-l:    #E1F5FE;
+      --red:      #C62828;
+      --bg:       #F9FBF2;
+      --card:     #FFFFFF;
+      --text:     #1B2E1B;
+      --muted:    #5a7360;
+      --radius:   16px;
+      --shadow:   0 4px 24px rgba(46,125,50,0.10);
+      --shadow-lg:0 8px 40px rgba(46,125,50,0.16);
+    }
+
+    /* ===== RESET ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .hindi { font-family: 'Noto Sans Devanagari', sans-serif; }
+
+    /* ===== NAV ===== */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--green-xl);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0.7rem 1.5rem;
+      box-shadow: 0 2px 12px rgba(46,125,50,0.08);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 0.5rem;
+      font-family: 'Baloo 2', cursive; font-size: 1.5rem; font-weight: 800;
+      color: var(--green); text-decoration: none;
+    }
+    .nav-brand span { font-size: 1.6rem; }
+    .nav-links { display: flex; gap: 0.3rem; align-items: center; flex-wrap: wrap; }
+    .nav-links a {
+      padding: 0.35rem 0.8rem; border-radius: 99px;
+      font-size: 0.82rem; font-weight: 500; color: var(--green);
+      text-decoration: none; transition: background 0.2s;
+    }
+    .nav-links a:hover { background: var(--green-xl); }
+
+    /* Language Toggle */
+    #lang-btn {
+      background: var(--green); color: #fff;
+      border: none; border-radius: 99px;
+      padding: 0.4rem 1rem; cursor: pointer;
+      font-size: 0.82rem; font-weight: 600; font-family: 'Poppins', sans-serif;
+      transition: background 0.2s;
+    }
+    #lang-btn:hover { background: var(--green-l); }
+
+    /* ===== HERO ===== */
+    .hero {
+      background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%);
+      color: #fff;
+      padding: 4rem 1.5rem 3.5rem;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-emoji { font-size: 4rem; display: block; margin-bottom: 0.5rem; animation: bounce 2s infinite; }
+    @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .hero h1 {
+      font-family: 'Baloo 2', cursive; font-size: clamp(2.2rem, 6vw, 3.5rem);
+      font-weight: 800; letter-spacing: -1px; margin-bottom: 0.4rem;
+    }
+    .hero p { font-size: 1.05rem; opacity: 0.88; max-width: 500px; margin: 0 auto 1.8rem; }
+    .hero-stats {
+      display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;
+      margin-top: 1.5rem;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat strong { display: block; font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: var(--gold); }
+    .hero-stat span { font-size: 0.78rem; opacity: 0.85; }
+
+    /* ===== SECTION WRAPPER ===== */
+    .section { padding: 2.5rem 1.2rem; max-width: 900px; margin: 0 auto; }
+    .section-title {
+      font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800;
+      color: var(--green); margin-bottom: 1.2rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    /* ===== FEATURE CARDS GRID ===== */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+    .feature-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1.3rem 1.2rem; box-shadow: var(--shadow);
+      border: 2px solid transparent; transition: all 0.25s;
+      cursor: pointer; text-decoration: none; color: inherit;
+      display: block;
+    }
+    .feature-card:hover { border-color: var(--green); box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+    .feature-card .icon { font-size: 2.2rem; margin-bottom: 0.6rem; display: block; }
+    .feature-card h3 { font-weight: 700; font-size: 1rem; margin-bottom: 0.3rem; color: var(--green); }
+    .feature-card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* ===== TAB PANELS ===== */
+    .tab-bar {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+    }
+    .tab-btn {
+      padding: 0.45rem 1rem; border-radius: 99px; border: 2px solid var(--green-xl);
+      background: #fff; color: var(--green); cursor: pointer;
+      font-size: 0.84rem; font-weight: 600; font-family: 'Poppins', sans-serif;
+      transition: all 0.2s;
+    }
+    .tab-btn.active, .tab-btn:hover { background: var(--green); color: #fff; border-color: var(--green); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ===== CROP GUIDE ===== */
+    .crop-select-row { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    select, input[type="text"] {
+      padding: 0.6rem 1rem; border-radius: 99px;
+      border: 2px solid var(--green-xl); background: #fff;
+      font-size: 0.9rem; font-family: 'Poppins', sans-serif;
+      color: var(--text); outline: none; transition: border 0.2s;
+    }
+    select:focus, input[type="text"]:focus { border-color: var(--green); }
+    .btn-green {
+      background: var(--green); color: #fff;
+      border: none; border-radius: 99px;
+      padding: 0.6rem 1.4rem; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; font-family: 'Poppins', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-green:hover { background: var(--green-l); }
+
+    .crop-card {
+      background: var(--card); border-radius: var(--radius);
+      padding: 1.4rem; box-shadow: var(--shadow);
+      border-left: 5px solid var(--green);
+    }
+    .crop-card h2 { font-family: 'Baloo 2', cursive; font-size: 1.5rem; color: var(--green); margin-bottom: 1rem; }
+    .crop-info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 0.8rem; margin-bottom: 1rem;
+    }
+    .crop-info-item {
+      background: var(--bg); border-radius: 10px; padding: 0.7rem 0.9rem;
+    }
+    .crop-info-item .label { font-size: 0.73rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    .crop-info-item .value { font-size: 0.95rem; font-weight: 600; margin-top: 0.1rem; color: var(--text); }
+    .tip-list { list-style: none; }
+    .tip-list li {
+      padding: 0.5rem 0; border-bottom: 1px solid var(--green-xl);
+      font-size: 0.88rem; display: flex; gap: 0.5rem; align-items: flex-start;
+    }
+    .tip-list li:last-child { border-bottom: none; }
+    .tip-list li::before { content: '✅'; flex-shrink: 0; }
+
+    /* ===== WEATHER ===== */
+    .weather-search { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+    .weather-card {
+      background: linear-gradient(135deg, var(--sky) 0%, #01579B 100%);
+      color: #fff; border-radius: var(--radius); padding: 1.5rem;
+      box-shadow: 0 6px 30px rgba(2,119,189,0.25);
+      display: none;
+    }
+    .weather-card.visible { display: block; animation: fadeIn 0.4s; }
+    .weather-main { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .weather-icon { font-size: 4rem; line-height: 1; }
+    .weather-temp { font-family: 'Baloo 2', cursive; font-size: 3.5rem; font-weight: 800; line-height: 1; }
+    .weather-city { font-size: 1.1rem; opacity: 0.88; }
+    .weather-desc { font-size: 0.95rem; opacity: 0.82; text-transform: capitalize; }
+    .weather-details {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 0.7rem;
+    }
+    .w-detail { background: rgba(255,255,255,0.15); border-radius: 10px; padding: 0.6rem; text-align: center; }
+    .w-detail .wd-label { font-size: 0.7rem; opacity: 0.75; text-transform: uppercase; letter-spacing: 0.05em; }
+    .w-detail .wd-val { font-size: 1rem; font-weight: 700; margin-top: 0.1rem; }
+    .weather-advisory {
+      margin-top: 1rem; background: rgba(255,255,255,0.18);
+      border-radius: 10px; padding: 0.9rem 1rem;
+    }
+    .weather-advisory p { font-size: 0.88rem; opacity: 0.92; }
+    .weather-advisory strong { display: block; font-size: 0.8rem; margin-bottom: 0.3rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .api-note {
+      background: var(--gold-l); border-radius: 10px; padding: 0.9rem 1rem;
+      font-size: 0.82rem; color: var(--soil); border-left: 4px solid var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    /* ===== DISEASE GUIDE ===== */
+    .disease-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+    .disease-card {
+      background: var(--card); border-radius: var(--radius); padding: 1.2rem;
+      box-shadow: var(--shadow); border-top: 4px solid var(--red);
+    }
+    .disease-card h3 { color: var(--red); font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .disease-card .affects { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.6rem; font-weight: 600; }
+    .disease-card p { font-size: 0.83rem; color: var(--text); margin-bottom: 0.5rem; line-height: 1.5; }
+    .remedy { background: #E8F5E9; border-radius: 8px; padding: 0.5rem 0.7rem; font-size: 0.8rem; color: var(--green); font-weight: 500; }
+
+    /* ===== MARKET PRICE ===== */
+    .price-table-wrap { overflow-x: auto; }
+    .price-table {
+      width: 100%; border-collapse: collapse; background: var(--card);
+      border-radius: var(--radius); overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .price-table thead { background: var(--green); color: #fff; }
+    .price-table th, .price-table td { padding: 0.75rem 1rem; text-align: left; font-size: 0.88rem; }
+    .price-table tbody tr:nth-child(even) { background: var(--bg); }
+    .price-table tbody tr:hover { background: var(--green-xl); transition: background 0.2s; }
+    .price-up { color: var(--green); font-weight: 700; }
+    .price-dn { color: var(--red); font-weight: 700; }
+    .price-badge {
+      display: inline-block; padding: 0.15rem 0.55rem;
+      border-radius: 99px; font-size: 0.75rem; font-weight: 600;
+    }
+    .badge-up { background: #E8F5E9; color: var(--green); }
+    .badge-dn { background: #FFEBEE; color: var(--red); }
+
+    /* ===== EMPTY / LOADING ===== */
+    .empty-state { text-align: center; padding: 2.5rem 1rem; color: var(--muted); }
+    .empty-state span { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+    .loading { text-align: center; padding: 2rem; color: var(--muted); }
+    .spinner {
+      width: 36px; height: 36px; border: 4px solid var(--green-xl);
+      border-top-color: var(--green); border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin: 0 auto 0.7rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center; padding: 1.5rem;
+      background: var(--green); color: rgba(255,255,255,0.85);
+      font-size: 0.82rem;
+      margin-top: 2rem;
+    }
+    footer strong { color: #fff; }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width: 600px) {
+      .nav-links { display: none; }
+      .hero { padding: 3rem 1rem 2.5rem; }
+      .hero-stats { gap: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-brand"><span>🌾</span> FarmEasy</a>
+  <div class="nav-links">
+    <a href="#crops">Crops</a>
+    <a href="#weather">Weather</a>
+    <a href="#diseases">Diseases</a>
+    <a href="#market">Market</a>
+  </div>
+  <button id="lang-btn" onclick="toggleLang()">हिन्दी</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-emoji">🌾</span>
+  <h1 id="hero-title">FarmEasy</h1>
+  <p id="hero-sub">Empowering 600 Million Farmers with Technology</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>600M</strong><span id="stat1">Farmers in India</span></div>
+    <div class="hero-stat"><strong>FREE</strong><span id="stat2">No cost to use</span></div>
+    <div class="hero-stat"><strong>30%</strong><span id="stat3">Crop loss reduced</span></div>
+  </div>
+</div>
+
+<!-- QUICK FEATURE TILES -->
+<div class="section">
+  <div class="section-title">🚀 <span id="features-heading">Quick Access</span></div>
+  <div class="features-grid">
+    <a class="feature-card" href="#crops" onclick="openTab('crops')">
+      <span class="icon">🌾</span>
+      <h3 id="fc1">Crop Guide</h3>
+      <p id="fd1">Select any crop and get full care tips, watering schedule & harvest time.</p>
+    </a>
+    <a class="feature-card" href="#weather" onclick="openTab('weather')">
+      <span class="icon">🌦️</span>
+      <h3 id="fc2">Weather Info</h3>
+      <p id="fd2">Live weather advisory based on your location to protect your crops.</p>
+    </a>
+    <a class="feature-card" href="#diseases" onclick="openTab('diseases')">
+      <span class="icon">🐛</span>
+      <h3 id="fc3">Disease Guide</h3>
+      <p id="fd3">Browse common pests & diseases with photos and organic remedies.</p>
+    </a>
+    <a class="feature-card" href="#market" onclick="openTab('market')">
+      <span class="icon">💰</span>
+      <h3 id="fc4">Market Price</h3>
+      <p id="fd4">Today's price per kg for major crops — updated daily.</p>
+    </a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT TABS -->
+<div class="section" id="main-tabs">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="openTab('crops')" id="tab-crops">🌾 <span id="tl1">Crop Guide</span></button>
+    <button class="tab-btn" onclick="openTab('weather')" id="tab-weather">🌦️ <span id="tl2">Weather</span></button>
+    <button class="tab-btn" onclick="openTab('diseases')" id="tab-diseases">🐛 <span id="tl3">Diseases</span></button>
+    <button class="tab-btn" onclick="openTab('market')" id="tab-market">💰 <span id="tl4">Market Price</span></button>
+  </div>
+
+  <!-- ===== TAB: CROP GUIDE ===== -->
+  <div class="tab-panel active" id="crops">
+    <div class="crop-select-row">
+      <select id="crop-select">
+        <option value="">-- Select Crop / फसल चुनें --</option>
+        <option value="wheat">🌾 Wheat (गेहूं)</option>
+        <option value="rice">🌾 Rice (चावल)</option>
+        <option value="maize">🌽 Maize (मक्का)</option>
+        <option value="tomato">🍅 Tomato (टमाटर)</option>
+        <option value="potato">🥔 Potato (आलू)</option>
+        <option value="onion">🧅 Onion (प्याज)</option>
+        <option value="sugarcane">🎋 Sugarcane (गन्ना)</option>
+        <option value="cotton">🪡 Cotton (कपास)</option>
+        <option value="soybean">🟤 Soybean (सोयाबीन)</option>
+      </select>
+      <button class="btn-green" onclick="showCropGuide()">🔍 <span id="search-btn-txt">Show Guide</span></button>
+    </div>
+    <div id="crop-output">
+      <div class="empty-state">
+        <span>🌱</span>
+        <p id="empty-crop">Select a crop above to see the full care guide!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: WEATHER ===== -->
+  <div class="tab-panel" id="weather">
+    <div class="api-note" id="api-note">
+      💡 <strong>Note:</strong> Enter any city name. This demo uses the <strong>OpenWeatherMap API</strong>.
+      To make it fully live, add your free API key in <code>script.js</code>.
+    </div>
+    <div class="weather-search">
+      <input type="text" id="city-input" placeholder="Enter city / शहर लिखें..." value="Delhi"/>
+      <button class="btn-green" onclick="fetchWeather()">🌤️ <span id="weather-btn-txt">Get Weather</span></button>
+    </div>
+    <div id="weather-output">
+      <div class="empty-state">
+        <span>🌤️</span>
+        <p id="empty-weather">Enter your city to get live weather and farming advisory.</p>
+      </div>
+    </div>
+    <!-- Demo weather card always visible as preview -->
+    <div class="weather-card visible" id="demo-weather">
+      <div class="weather-main">
+        <div class="weather-icon">⛅</div>
+        <div>
+          <div class="weather-temp">28°C</div>
+          <div class="weather-city">Delhi, IN</div>
+          <div class="weather-desc">Partly Cloudy</div>
+        </div>
+      </div>
+      <div class="weather-details">
+        <div class="w-detail"><div class="wd-label">Humidity</div><div class="wd-val">62%</div></div>
+        <div class="w-detail"><div class="wd-label">Wind</div><div class="wd-val">14 km/h</div></div>
+        <div class="w-detail"><div class="wd-label">Feels Like</div><div class="wd-val">30°C</div></div>
+      </div>
+      <div class="weather-advisory">
+        <strong id="advisory-label">🌾 Farming Advisory</strong>
+        <p id="advisory-text">Good conditions for field work. Moderate humidity is suitable for most crops. Avoid heavy irrigation today as natural moisture is adequate.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== TAB: DISEASE GUIDE ===== -->
+  <div class="tab-panel" id="diseases">
+    <div class="disease-grid" id="disease-list"></div>
+  </div>
+
+  <!-- ===== TAB: MARKET PRICE ===== -->
+  <div class="tab-panel" id="market">
+    <div class="price-table-wrap">
+      <table class="price-table" id="price-table">
+        <thead>
+          <tr>
+            <th>Crop</th>
+            <th id="th-price">Price (₹/kg)</th>
+            <th id="th-change">Change</th>
+            <th id="th-market">Market</th>
+          </tr>
+        </thead>
+        <tbody id="price-tbody"></tbody>
+      </table>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:0.7rem;">
+      * Prices are sample data. Connect to <a href="https://agmarknet.gov.in" target="_blank" style="color:var(--green)">agmarknet.gov.in</a> API for real-time prices.
+    </p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <strong>🌾 FarmEasy</strong> — Empowering Farmers with Technology &nbsp;|&nbsp;
+  Path Finder 3.0 Hackathon 2026 &nbsp;|&nbsp; Team Sibil
+</footer>
+
+<script>
+// ===============================================================
+//  DATA
+// ===============================================================
+const CROPS = {
+  wheat: {
+    name: "Wheat (गेहूं)",
+    season: "Rabi (Oct–Mar)",
+    water: "Every 20–25 days",
+    fertilizer: "DAP 50kg/acre at sowing; Urea 25kg at tillering",
+    harvest: "March – April (120–150 days)",
+    soil: "Loamy / Clay loam",
+    tips: [
+      "Sow when soil temp is 20–22°C",
+      "First irrigation at crown root stage (20–25 days after sowing)",
+      "Use certified seeds for best yield",
+      "Watch for rust disease in Feb–March",
+      "Harvest when moisture < 12%"
+    ]
+  },
+  rice: {
+    name: "Rice (चावल)",
+    season: "Kharif (Jun–Nov)",
+    water: "Flood irrigation; keep 5cm standing water",
+    fertilizer: "Urea 50kg + DAP 25kg per acre",
+    harvest: "October – November (90–120 days)",
+    soil: "Clay / Heavy loam",
+    tips: [
+      "Transplant 25–30 day old seedlings",
+      "Maintain standing water of 5cm during vegetative stage",
+      "Drain field 10 days before harvest",
+      "Apply zinc sulphate 10kg/acre to prevent deficiency",
+      "Watch for blast disease in humid conditions"
+    ]
+  },
+  maize: {
+    name: "Maize / Corn (मक्का)",
+    season: "Kharif (Jun–Sep) or Rabi",
+    water: "Every 10–12 days; critical at tasseling stage",
+    fertilizer: "NPK 60:30:20 kg/acre",
+    harvest: "September – October (75–100 days)",
+    soil: "Well-drained loamy",
+    tips: [
+      "Sow seeds 3–4 cm deep, 20cm apart",
+      "Thin seedlings to one per hill at 2–3 leaf stage",
+      "Earthing up improves root support",
+      "Watch for Fall Armyworm — use neem spray",
+      "Harvest when husk turns brown and dry"
+    ]
+  },
+  tomato: {
+    name: "Tomato (टमाटर)",
+    season: "Year-round (avoid extreme heat)",
+    water: "Every 3–4 days; drip irrigation ideal",
+    fertilizer: "NPK 100:60:80 kg/acre; Foliar spray of 0.5% urea",
+    harvest: "60–85 days after transplanting",
+    soil: "Sandy loam, well-drained",
+    tips: [
+      "Transplant 25–30 day seedlings",
+      "Stake plants to prevent lodging",
+      "Pinch off suckers for better fruit set",
+      "Spray calcium to prevent blossom end rot",
+      "Harvest at breaker or red stage based on market distance"
+    ]
+  },
+  potato: {
+    name: "Potato (आलू)",
+    season: "Rabi (Oct–Feb)",
+    water: "Every 8–10 days; critical at tuber initiation",
+    fertilizer: "NPK 120:60:100 kg/acre",
+    harvest: "75–90 days",
+    soil: "Loamy / Sandy loam",
+    tips: [
+      "Use certified disease-free seed tubers",
+      "Cut seed pieces with at least 2 eyes",
+      "Earth up 30–35 days after planting",
+      "Stop irrigation 10 days before harvest",
+      "Store in cool, dark, ventilated place"
+    ]
+  },
+  onion: {
+    name: "Onion (प्याज)",
+    season: "Rabi (Oct–Apr)",
+    water: "Every 7–10 days; stop 10 days before harvest",
+    fertilizer: "NPK 100:50:50 kg/acre; Sulphur 20kg/acre",
+    harvest: "April – May (120–150 days)",
+    soil: "Sandy loam, well-drained",
+    tips: [
+      "Transplant 6–8 week old seedlings",
+      "Avoid waterlogging — causes bulb rot",
+      "Apply sulphur for pungency and storage quality",
+      "Harvest when 75% tops fall over",
+      "Cure bulbs in shade for 7–10 days before storage"
+    ]
+  },
+  sugarcane: {
+    name: "Sugarcane (गन्ना)",
+    season: "Feb–Mar planting; Harvest after 10–12 months",
+    water: "Every 7–10 days; critical in grand growth period",
+    fertilizer: "NPK 180:80:80 kg/acre split in 3 doses",
+    harvest: "December – March",
+    soil: "Deep loamy",
+    tips: [
+      "Use 3-budded setts for planting",
+      "Trash mulching conserves moisture",
+      "Earthing up at 60 and 90 days",
+      "Intercrop with legumes in early stage",
+      "Harvest when Brix reading is above 18%"
+    ]
+  },
+  cotton: {
+    name: "Cotton (कपास)",
+    season: "Kharif (Apr–Nov)",
+    water: "Every 15–20 days; avoid waterlogging",
+    fertilizer: "NPK 80:40:40 kg/acre; Boron foliar spray",
+    harvest: "October – January (180–200 days)",
+    soil: "Black cotton soil / Deep loamy",
+    tips: [
+      "Use Bt cotton to reduce bollworm attack",
+      "Thinning to one plant per hill at 15 days",
+      "Spray neem oil for early pest management",
+      "Avoid excess nitrogen — causes vegetative growth",
+      "Pick every 15–20 days; 3–4 pickings typical"
+    ]
+  },
+  soybean: {
+    name: "Soybean (सोयाबीन)",
+    season: "Kharif (Jun–Oct)",
+    water: "Critical at flowering & pod filling; rain-fed mostly",
+    fertilizer: "NPK 20:60:40 kg/acre; Rhizobium seed treatment",
+    harvest: "October (85–100 days)",
+    soil: "Loamy / Clay loam",
+    tips: [
+      "Seed treatment with Rhizobium + PSB culture",
+      "Sow on raised beds for drainage",
+      "Interculture 20 and 40 days after sowing",
+      "Watch for yellow mosaic virus — spray insecticide",
+      "Harvest when 90% pods turn yellow-brown"
+    ]
+  }
+};
+
+const DISEASES = [
+  { name:"Wheat Rust", affects:"Wheat, Barley", desc:"Orange/yellow powdery pustules on leaves and stems. Spreads rapidly in cool, humid weather.", remedy:"🟢 Spray Propiconazole 0.1% or Mancozeb. Use resistant varieties." },
+  { name:"Rice Blast", affects:"Rice", desc:"Diamond-shaped brown lesions on leaves, neck, and panicle. Caused by Magnaporthe oryzae fungus.", remedy:"🟢 Tricyclazole 75WP spray at 10-day intervals. Avoid excess nitrogen." },
+  { name:"Late Blight", affects:"Potato, Tomato", desc:"Dark brown water-soaked spots on leaves. White mold on underside. Can destroy field in days.", remedy:"🟢 Spray Mancozeb + Metalaxyl 0.2%. Remove infected plants immediately." },
+  { name:"Cotton Bollworm", affects:"Cotton", desc:"Larvae bore into bolls and feed on seeds. Causes up to 60% yield loss if uncontrolled.", remedy:"🟢 Bt cotton is resistant. Spray Chlorpyrifos or neem seed kernel extract." },
+  { name:"Yellow Mosaic Virus", affects:"Soybean, Moong", desc:"Yellow-green mosaic pattern on leaves. Transmitted by whitefly insects.", remedy:"🟢 No direct cure. Control whiteflies with Imidacloprid. Remove infected plants." },
+  { name:"Aphids", affects:"All Crops", desc:"Tiny green/black insects cluster on tender shoots, sucking sap. Cause leaf curl and spread viruses.", remedy:"🟢 Neem oil spray 5ml/L water. Ladybird beetles are natural predators." },
+  { name:"Powdery Mildew", affects:"Vegetables, Grapes", desc:"White powdery coating on leaf surface. Thrives in warm dry weather with cool nights.", remedy:"🟢 Spray wettable sulphur 0.3% or Karathane. Improve air circulation." },
+  { name:"Stem Borer", affects:"Rice, Maize, Sugarcane", desc:"Larvae bore into stems, causing 'dead heart' in vegetative stage and 'white ear' at panicle.", remedy:"🟢 Release Trichogramma egg parasitoid. Apply Chlorpyrifos granules in whorls." }
+];
+
+const MARKET_PRICES = [
+  { crop:"🌾 Wheat (गेहूं)",    price:2150, change:+35,  market:"APMC Delhi"   },
+  { crop:"🌾 Rice (चावल)",     price:3200, change:-20,  market:"APMC Patna"   },
+  { crop:"🌽 Maize (मक्का)",   price:1850, change:+15,  market:"APMC Nagpur"  },
+  { crop:"🍅 Tomato (टमाटर)", price:2800, change:+120, market:"Azadpur Mandi" },
+  { crop:"🥔 Potato (आलू)",   price:1200, change:-40,  market:"Agra APMC"    },
+  { crop:"🧅 Onion (प्याज)",  price:1600, change:+80,  market:"Lasalgaon"    },
+  { crop:"🎋 Sugarcane (गन्ना)",price:320,  change:0,    market:"UP SAP Rate"  },
+  { crop:"🪡 Cotton (कपास)",  price:6800, change:+200, market:"MCX / CCI"    },
+  { crop:"🟤 Soybean (सोयाबीन)",price:4200, change:-100, market:"NCDEX"       },
+];
+
+// ===============================================================
+//  LANGUAGE
+// ===============================================================
+let isHindi = false;
+
+const TRANSLATIONS = {
+  "hero-title":     ["FarmEasy", "फार्मईज़ी"],
+  "hero-sub":       ["Empowering 600 Million Farmers with Technology", "60 करोड़ किसानों को तकनीक से सशक्त बनाना"],
+  "stat1":          ["Farmers in India", "भारत में किसान"],
+  "stat2":          ["No cost to use", "बिल्कुल मुफ्त"],
+  "stat3":          ["Crop loss reduced", "फसल हानि कम"],
+  "features-heading":["Quick Access", "त्वरित पहुँच"],
+  "fc1":            ["Crop Guide", "फसल गाइड"],
+  "fd1":            ["Select any crop and get full care tips, watering schedule & harvest time.", "कोई भी फसल चुनें और पूरी देखभाल की जानकारी पाएं।"],
+  "fc2":            ["Weather Info", "मौसम जानकारी"],
+  "fd2":            ["Live weather advisory based on your location to protect your crops.", "अपनी फसल बचाने के लिए लाइव मौसम सलाह।"],
+  "fc3":            ["Disease Guide", "रोग गाइड"],
+  "fd3":            ["Browse common pests & diseases with photos and organic remedies.", "आम कीट व रोगों की जानकारी और जैविक उपाय।"],
+  "fc4":            ["Market Price", "बाज़ार भाव"],
+  "fd4":            ["Today's price per kg for major crops — updated daily.", "प्रमुख फसलों का आज का भाव — रोज़ अपडेट।"],
+  "tl1":            ["Crop Guide", "फसल गाइड"],
+  "tl2":            ["Weather", "मौसम"],
+  "tl3":            ["Diseases", "रोग"],
+  "tl4":            ["Market Price", "बाज़ार भाव"],
+  "search-btn-txt": ["Show Guide", "गाइड दिखाएं"],
+  "weather-btn-txt":["Get Weather", "मौसम देखें"],
+  "empty-crop":     ["Select a crop above to see the full care guide!", "ऊपर से फसल चुनें और पूरी जानकारी देखें!"],
+  "empty-weather":  ["Enter your city to get live weather and farming advisory.", "लाइव मौसम और खेती सलाह के लिए शहर डालें।"],
+  "advisory-label": ["🌾 Farming Advisory", "🌾 खेती सलाह"],
+  "advisory-text":  ["Good conditions for field work. Moderate humidity is suitable for most crops. Avoid heavy irrigation today as natural moisture is adequate.", "खेत के काम के लिए अच्छी स्थिति है। मध्यम नमी अधिकांश फसलों के लिए उपयुक्त है। आज भारी सिंचाई से बचें।"],
+  "th-price":       ["Price (₹/kg)", "भाव (₹/किग्रा)"],
+  "th-change":      ["Change", "बदलाव"],
+  "th-market":      ["Market", "बाज़ार"],
+};
+
+function toggleLang() {
+  isHindi = !isHindi;
+  document.getElementById('lang-btn').textContent = isHindi ? 'English' : 'हिन्दी';
+  for (const [id, vals] of Object.entries(TRANSLATIONS)) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = vals[isHindi ? 1 : 0];
+  }
+  // Re-render visible content
+  showCropGuide();
+  renderDiseases();
+  renderMarket();
+  localStorage.setItem('farmeasy_lang', isHindi ? 'hi' : 'en');
+}
+
+// ===============================================================
+//  TABS
+// ===============================================================
+function openTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('main-tabs').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ===============================================================
+//  CROP GUIDE
+// ===============================================================
+function showCropGuide() {
+  const val = document.getElementById('crop-select').value;
+  const out = document.getElementById('crop-output');
+  if (!val) {
+    out.innerHTML = `<div class="empty-state"><span>🌱</span><p>${isHindi ? 'ऊपर से फसल चुनें!' : 'Select a crop above!'}</p></div>`;
+    return;
+  }
+  const c = CROPS[val];
+  const hi = isHindi;
+  const labels = hi
+    ? ['मौसम','सिंचाई','उर्वरक','कटाई','मिट्टी']
+    : ['Season','Watering','Fertilizer','Harvest Time','Best Soil'];
+  const tipsLabel = hi ? '💡 महत्वपूर्ण सुझाव' : '💡 Key Farming Tips';
+
+  out.innerHTML = `
+    <div class="crop-card">
+      <h2>${c.name}</h2>
+      <div class="crop-info-grid">
+        <div class="crop-info-item"><div class="label">${labels[0]}</div><div class="value">${c.season}</div></div>
+        <div class="crop-info-item"><div class="label">${labels[1]}</div><div class="value">${c.water}</div></div>
+        <div class="crop-info-item"><div class="label">${labels[2]}</div><div class="value">${c.fertilizer}</div></div>
+        <div class="crop-info-item"><div class="label">${labels[3]}</div><div class="value">${c.harvest}</div></div>
+        <div class="crop-info-item"><div class="label">${labels[4]}</div><div class="value">${c.soil}</div></div>
+      </div>
+      <h3 style="font-size:1rem;font-weight:700;color:var(--green);margin-bottom:0.6rem;">${tipsLabel}</h3>
+      <ul class="tip-list">
+        ${c.tips.map(t => `<li>${t}</li>`).join('')}
+      </ul>
+    </div>`;
+}
+
+// ===============================================================
+//  WEATHER (Demo + optional API)
+// ===============================================================
+const WEATHER_KEY = 'YOUR_API_KEY_HERE'; // Replace with your OpenWeather API key
+
+async function fetchWeather() {
+  const city = document.getElementById('city-input').value.trim();
+  if (!city) return;
+
+  const out = document.getElementById('weather-output');
+  const demo = document.getElementById('demo-weather');
+
+  // If no real API key, show demo
+  if (WEATHER_KEY === 'YOUR_API_KEY_HERE') {
+    demo.style.display = '';
+    out.innerHTML = `<div class="api-note">
+      ⚠️ ${isHindi ? 'लाइव मौसम के लिए कोड में OpenWeather API Key डालें।' : 'To fetch live weather, add your OpenWeather API key in index.html (WEATHER_KEY variable).'}</div>`;
+    return;
+  }
+
+  out.innerHTML = `<div class="loading"><div class="spinner"></div>${isHindi ? 'मौसम लोड हो रहा है...' : 'Loading weather...'}</div>`;
+  demo.style.display = 'none';
+
+  try {
+    const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${WEATHER_KEY}&units=metric`);
+    const d = await res.json();
+    if (d.cod !== 200) throw new Error(d.message);
+
+    const icon = weatherIcon(d.weather[0].main);
+    const advisory = getAdvisory(d.main.temp, d.main.humidity, d.weather[0].main);
+
+    out.innerHTML = `
+      <div class="weather-card visible">
+        <div class="weather-main">
+          <div class="weather-icon">${icon}</div>
+          <div>
+            <div class="weather-temp">${Math.round(d.main.temp)}°C</div>
+            <div class="weather-city">${d.name}, ${d.sys.country}</div>
+            <div class="weather-desc">${d.weather[0].description}</div>
+          </div>
+        </div>
+        <div class="weather-details">
+          <div class="w-detail"><div class="wd-label">${isHindi ? 'नमी' : 'Humidity'}</div><div class="wd-val">${d.main.humidity}%</div></div>
+          <div class="w-detail"><div class="wd-label">${isHindi ? 'हवा' : 'Wind'}</div><div class="wd-val">${Math.round(d.wind.speed * 3.6)} km/h</div></div>
+          <div class="w-detail"><div class="wd-label">${isHindi ? 'महसूस' : 'Feels Like'}</div><div class="wd-val">${Math.round(d.main.feels_like)}°C</div></div>
+        </div>
+        <div class="weather-advisory">
+          <strong>${isHindi ? '🌾 खेती सलाह' : '🌾 Farming Advisory'}</strong>
+          <p>${advisory}</p>
+        </div>
+      </div>`;
+  } catch (e) {
+    out.innerHTML = `<div class="api-note">❌ ${isHindi ? 'शहर नहीं मिला। दोबारा जांचें।' : 'City not found. Please check the name.'}</div>`;
+  }
+}
+
+function weatherIcon(main) {
+  const map = { Clear:'☀️', Clouds:'⛅', Rain:'🌧️', Drizzle:'🌦️', Thunderstorm:'⛈️', Snow:'❄️', Mist:'🌫️', Haze:'🌫️' };
+  return map[main] || '🌡️';
+}
+
+function getAdvisory(temp, humidity, condition) {
+  if (condition === 'Rain' || condition === 'Thunderstorm')
+    return isHindi ? 'आज सिंचाई न करें। तूफान की स्थिति में फसल की सुरक्षा करें।' : 'Avoid irrigation today. Protect standing crops from storm damage.';
+  if (temp > 38)
+    return isHindi ? 'बहुत गर्मी है। सुबह या शाम को सिंचाई करें। फसल को धूप से बचाएं।' : 'Very hot conditions. Irrigate early morning or evening. Mulch to retain soil moisture.';
+  if (temp < 8)
+    return isHindi ? 'ठंड की संभावना है। पाले से फसल बचाएं। रात में हल्की सिंचाई करें।' : 'Risk of frost. Cover sensitive crops. Light irrigation at night can prevent frost damage.';
+  if (humidity > 80)
+    return isHindi ? 'अधिक नमी से फफूंद रोग हो सकता है। फफूंदनाशक का छिड़काव करें।' : 'High humidity — risk of fungal diseases. Apply preventive fungicide spray.';
+  return isHindi ? 'खेती के काम के लिए अच्छी स्थिति है। नियमित देखभाल जारी रखें।' : 'Good conditions for farming. Continue regular crop maintenance and scheduled irrigation.';
+}
+
+// ===============================================================
+//  DISEASES
+// ===============================================================
+function renderDiseases() {
+  const list = document.getElementById('disease-list');
+  list.innerHTML = DISEASES.map(d => `
+    <div class="disease-card">
+      <h3>🦠 ${d.name}</h3>
+      <div class="affects">Affects: ${d.affects}</div>
+      <p>${d.desc}</p>
+      <div class="remedy">${d.remedy}</div>
+    </div>
+  `).join('');
+}
+
+// ===============================================================
+//  MARKET PRICES
+// ===============================================================
+function renderMarket() {
+  const tbody = document.getElementById('price-tbody');
+  tbody.innerHTML = MARKET_PRICES.map(p => {
+    const dir = p.change > 0 ? '▲' : p.change < 0 ? '▼' : '—';
+    const cls = p.change > 0 ? 'price-up' : p.change < 0 ? 'price-dn' : '';
+    const badge = p.change > 0 ? 'badge-up' : p.change < 0 ? 'badge-dn' : '';
+    return `
+      <tr>
+        <td>${p.crop}</td>
+        <td><strong>₹${p.price}</strong></td>
+        <td><span class="price-badge ${badge} ${cls}">${dir} ${Math.abs(p.change)}</span></td>
+        <td style="color:var(--muted);font-size:0.82rem">${p.market}</td>
+      </tr>`;
+  }).join('');
+}
+
+// ===============================================================
+//  INIT
+// ===============================================================
+document.addEventListener('DOMContentLoaded', () => {
+  // Restore language preference
+  const saved = localStorage.getItem('farmeasy_lang');
+  if (saved === 'hi') toggleLang();
+
+  renderDiseases();
+  renderMarket();
+
+  // Enter key on city input
+  document.getElementById('city-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') fetchWeather();
+  });
+});
+</script>
+</body>
+</html>
